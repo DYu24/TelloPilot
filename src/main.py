@@ -8,8 +8,7 @@ import pygame
 
 from controllers.keyboard import Keyboard
 from cv.face_detector import FaceDetector
-
-# image = None
+from cv.tracker import Tracker
 
 def flight_handler(event, sender, data, **args):
     if event is sender.EVENT_FLIGHT_DATA:
@@ -17,8 +16,10 @@ def flight_handler(event, sender, data, **args):
     
 def video_thread(drone, face_detector):
     try:
+        tracker = Tracker(drone)
         container = av.open(drone.get_video_stream())
 
+        frame_skip = 0
         while True and container:
             for frame in container.decode(video=0):
                 if frame_skip > 0:
@@ -26,7 +27,8 @@ def video_thread(drone, face_detector):
                     continue
     
                 start_time = time.time()
-                image = face_detector.detect_face(np.array(frame.to_image()))
+                image = tracker.track_face(np.array(frame.to_image()), 50)
+                # image = face_detector.detect_face(np.array(frame.to_image()))
                 cv2.imshow('Tello', image)
                 cv2.waitKey(1)
 
@@ -46,6 +48,7 @@ if __name__ == '__main__':
     # Setup keyboard to control the drone
     pygame.init()
     pygame.display.init()
+    pygame.display.set_mode((200, 200))
     controller = Keyboard(drone)
     speed = 50
 
@@ -54,7 +57,7 @@ if __name__ == '__main__':
     
     try:
         # Print flight data to console
-        # drone.subscribe(drone.EVENT_FLIGHT_DATA, flight_handler)
+        drone.subscribe(drone.EVENT_FLIGHT_DATA, flight_handler)
         
         # Connect to drone
         drone.connect()
@@ -76,6 +79,7 @@ if __name__ == '__main__':
                     controller.handleInput(pygame.key.name(event.key), speed)
                 elif event.type == pygame.KEYUP:
                     controller.handleInput(pygame.key.name(event.key), 0)
+    
     except KeyboardInterrupt:
         print('Exiting program...')
         exit(1)

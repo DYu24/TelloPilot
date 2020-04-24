@@ -6,6 +6,7 @@ Currently, the supported features include:
 
 * Controlling the drone with a keyboard
 * Face detection using computer vision
+* Face tracking to keep the main subject in frame
 
 ## Setup
 This project was implemented and run on a Windows machine. To setup the project:
@@ -47,3 +48,7 @@ PyAV depends on `ffmpeg` to work, and so they must be downloaded first.
 
 ## Running the project
 To get the project started, run `python main.py` in the `src` directory.
+
+## Troubleshooting
+
+If the video stream connection is timing out, try turning of your firewall.
